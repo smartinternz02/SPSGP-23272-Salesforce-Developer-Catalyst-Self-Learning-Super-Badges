@@ -1,27 +1,29 @@
-public class AddPrimaryContact implements Queueable{
+@isTest
+public class AddPrimaryContactTest {
     
-    private Contact con;
-    private String state;
-    
-    public AddPrimaryContact(Contact con , String state){
-        this.con = con;
-        this.state = state;
-    }
-    
-    public void execute(QueueableContext context){
-        List<Account> accounts = [Select Id,Name,(Select FirstName,LastName, Id from contacts)
-                                 from Account where BillingState = :state Limit 200];
-        List<Contact> primaryContacts = new List<Contact>();
+    @isTest
+    static void testAddPrimaryContact() {
+        // Create test data
+        Account acc1 = new Account(Name = 'Test Account 1', BillingState = 'CA');
+        Account acc2 = new Account(Name = 'Test Account 2', BillingState = 'CA');
+        insert new List<Account>{acc1, acc2};
         
-        for(Account acc:accounts){
-            Contact c = con.clone();
-            c.AccountId = acc.Id;
-            primaryContacts.add(c);
-        }
+        Contact con = new Contact(FirstName = 'John', LastName = 'Doe');
         
-        if(primaryContacts.size() >0){
-            insert primaryContacts;
+        // Instantiate the Queueable class
+        AddPrimaryContact addPrimaryContact = new AddPrimaryContact(con, 'CA');
+        
+        Test.startTest();
+        // Enqueue the job
+        System.enqueueJob(addPrimaryContact);
+        Test.stopTest();
+        
+        // Verify that the contacts were created
+        List<Contact> contacts = [SELECT Id, FirstName, LastName, AccountId FROM Contact WHERE AccountId IN :new List<Id>{acc1.Id, acc2.Id}];
+        System.assertEquals(2, contacts.size());
+        for (Contact c : contacts) {
+            System.assertEquals('John', c.FirstName);
+            System.assertEquals('Doe', c.LastName);
         }
     }
-
 }
