@@ -1,3 +1,33 @@
+@isTest
 public class TestRestrictContactByName {
-
+    
+    @isTest
+    static void testInvalidLastName() {
+        // Create a contact with an invalid last name
+        Contact invalidContact = new Contact(LastName = 'INVALIDNAME');
+        
+        Test.startTest();
+        try {
+            insert invalidContact;
+            // If no exception is thrown, the test should fail
+            System.assert(false, 'Expected DMLException was not thrown');
+        } catch (DmlException e) {
+            // Verify that the error message is as expected
+            System.assert(e.getMessage().contains('The Last Name "INVALIDNAME" is not allowed for DML'));
+        }
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testValidLastName() {
+        // Create a contact with a valid last name
+        Contact validContact = new Contact(LastName = 'VALIDNAME');
+        
+        Test.startTest();
+        insert validContact;
+        Test.stopTest();
+        
+        // Verify that the contact was inserted successfully
+        System.assertNotEquals(null, validContact.Id);
+    }
 }
