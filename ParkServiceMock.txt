@@ -1,0 +1,26 @@
+@isTest
+public class ParkServiceMock implements WebServiceMock {
+    public void doInvoke(Object request, Object response, Map<String, Object> responseHeaders, String endpoint, String action, String requestEnvelope, String responseEnvelope, String responseType, String httpStatusCode) {
+        // Cast the request to the expected request class
+        ParkService.byCountry requestBody = (ParkService.byCountry) request;
+
+        // Create the mock response object
+        ParkService.byCountryResponse mockResponse = new ParkService.byCountryResponse();
+        
+        // Define park names based on the requested country
+        if (requestBody.arg0.contains('United States')) {
+            mockResponse.return_x = new String[] {'Yellowstone', 'Mackinac National Park', 'Yosemite'};
+        } else if (requestBody.arg0.contains('Germany')) {
+            mockResponse.return_x = new String[] {'Black Forest', 'Bavarian Forest'};
+        } else if (requestBody.arg0.contains('India')) {
+            mockResponse.return_x = new String[] {'Jim Corbett', 'Kaziranga', 'Sundarbans'};
+        } else if (requestBody.arg0.contains('Japan')) {
+            mockResponse.return_x = new String[] {'Nikko', 'Yoshino-Kumano', 'Shiretoko'};
+        } else {
+            mockResponse.return_x = new String[] {}; // No parks found
+        }
+
+        // Set the response with the mock response object
+        response = mockResponse; // Set the response to the mock 
+	}
+}
